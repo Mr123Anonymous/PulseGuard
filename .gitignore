@@ -1,0 +1,28 @@
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Artifacts and local data files
+artifacts/
+artifacts/*.pkl
+artifacts/*.json
+artifacts/*.csv
+artifacts/figures/*.png
+data/raw/*.csv
+data/raw/*.zip
+data/processed/*.csv
+
+# Streamlit runtime state
+.streamlit/
+
+# OS files
+.DS_Store
+Thumbs.db
