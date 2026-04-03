@@ -1,6 +1,6 @@
 # GDSA Internship Showcase: Healthcare Readmission Analytics
 
-This project is an internship-style implementation designed to mirror common Global Data Science & Analytics tasks in healthcare and medical-device adjacent analytics workflows.
+This project is designed to mirror common Global Data Science & Analytics tasks in healthcare and medical-device adjacent analytics workflows.
 
 ## Project goals
 - Clean and analyze real-world healthcare data.
@@ -17,7 +17,7 @@ Use the UCI Diabetes 130-US hospitals dataset.
 
 ## Folder structure
 - `src/`: pipeline code for data prep, modeling, and monitoring.
-- `sql/`: interview-ready cohort analysis queries.
+- `sql/`: cohort analysis queries.
 - `reports/`: literature summary and final report templates.
 - `artifacts/`: generated metrics, models, and monitoring outputs.
 
@@ -31,7 +31,7 @@ streamlit run streamlit_app.py
 ```
 
 ## Streamlit dashboard
-The dashboard implements five interview-focused sections:
+The dashboard implements five sections:
 1. Problem and business outcome.
 2. Data quality snapshot, including before/after cleaning counters.
 3. EDA insights from generated charts.
@@ -54,11 +54,6 @@ The dashboard implements five interview-focused sections:
 - `artifacts/forest_permutation_importance.csv`
 - `artifacts/presentation_summary.json`
 - `reports/executive_brief.md`
-
-## Implemented next steps
-- Added automated EDA charts and summary generation for quick storytelling.
-- Added explainability outputs (logistic top coefficients and forest permutation importance).
-- Added a presentation-ready executive brief and consolidated summary JSON.
 
 ## Suggested next improvements
 - Add SHAP for richer model explainability.
