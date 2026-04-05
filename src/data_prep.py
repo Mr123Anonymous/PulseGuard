@@ -47,6 +47,9 @@ def load_and_prepare_data() -> pd.DataFrame:
     if "readmitted" not in df.columns:
         raise ValueError("Expected 'readmitted' column in raw data.")
 
+    valid_readmit_values = {"<30", ">30", "NO"}
+    df = df[df["readmitted"].isin(valid_readmit_values)].copy()
+
     df["target_readmit_30d"] = _binary_target(df["readmitted"]).astype(int)
 
     # Remove leakage-like columns and IDs not useful for baseline modeling.

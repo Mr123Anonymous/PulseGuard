@@ -58,8 +58,15 @@ def train_and_evaluate() -> ModelResult:
         )
 
     df = pd.read_csv(DATA_PROCESSED)
-    y = df["target_readmit_30d"]
+    y = pd.to_numeric(df["target_readmit_30d"], errors="coerce")
     X = df.drop(columns=["target_readmit_30d"])
+
+    valid_mask = y.notna()
+    X = X.loc[valid_mask].reset_index(drop=True)
+    y = y.loc[valid_mask].astype(int).reset_index(drop=True)
+
+    if y.nunique() < 2:
+        raise ValueError("Target must contain at least two classes after cleaning.")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
