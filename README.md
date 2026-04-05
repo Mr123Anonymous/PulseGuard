@@ -24,7 +24,15 @@ Use the UCI Diabetes 130-US hospitals dataset.
 ## Quickstart
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
+# Windows (PowerShell)
+.\.venv\Scripts\Activate.ps1
+
+# Windows (Command Prompt)
+.venv\Scripts\activate.bat
+
+# macOS/Linux
+source .venv/bin/activate
+
 pip install -r requirements.txt
 python -m src.run_pipeline
 streamlit run streamlit_app.py
