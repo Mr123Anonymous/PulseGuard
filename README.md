@@ -38,6 +38,13 @@ python -m src.run_pipeline
 streamlit run streamlit_app.py
 ```
 
+## Cloud deployment
+If you deploy without committing generated data and artifacts, set one or both of these sources so the dashboard can load files remotely:
+- `PULSEGUARD_DATA_BASE_URL` for `data/raw/` and `data/processed/` files.
+- `PULSEGUARD_ARTIFACTS_BASE_URL` for `artifacts/` files and figures.
+
+The URLs should mirror the repo folder structure. For example, a GitHub raw base URL can point at the repository root and the app will request paths like `data/raw/diabetic_data.csv` and `artifacts/metrics.json` from that base.
+
 ## Streamlit dashboard
 The dashboard implements five sections:
 1. Problem and business outcome.

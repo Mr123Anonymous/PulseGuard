@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
+from urllib.parse import urljoin
+from urllib.request import urlopen
 
 import pandas as pd
 import streamlit as st
@@ -14,15 +17,57 @@ DATA_RAW = ROOT / "data" / "raw" / "diabetic_data.csv"
 DATA_PROCESSED = ROOT / "data" / "processed" / "model_input.csv"
 
 
+def get_setting(secrets_key: str, env_key: str) -> str | None:
+    try:
+        value = st.secrets.get(secrets_key)
+    except Exception:
+        value = None
+    if isinstance(value, str) and value.strip():
+        return value.strip().rstrip("/")
+    value = os.getenv(env_key)
+    if value and value.strip():
+        return value.strip().rstrip("/")
+    return None
+
+
+DATA_BASE_URL = get_setting("data_base_url", "PULSEGUARD_DATA_BASE_URL")
+ARTIFACTS_BASE_URL = get_setting("artifacts_base_url", "PULSEGUARD_ARTIFACTS_BASE_URL")
+
+
+def remote_url(base_url: str | None, path: Path) -> str | None:
+    if not base_url:
+        return None
+    return urljoin(f"{base_url.rstrip('/')}/", path.as_posix())
+
+
 def load_json(path: Path) -> dict:
     if not path.exists():
-        return {}
+        remote = remote_url(ARTIFACTS_BASE_URL, path.relative_to(ROOT))
+        if remote is None:
+            return {}
+        try:
+            with urlopen(remote) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except Exception:
+            return {}
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
+def load_csv(path: Path, base_url: str | None) -> pd.DataFrame | None:
+    if path.exists():
+        return pd.read_csv(path)
+    remote = remote_url(base_url, path.relative_to(ROOT))
+    if remote is None:
+        return None
+    try:
+        return pd.read_csv(remote)
+    except Exception:
+        return None
+
+
 def warn_missing(path: Path) -> None:
-    st.warning(f"Missing file: {path}. Run python -m src.run_pipeline first.")
+    st.warning(f"Missing file: {path}. Run python -m src.run_pipeline first or configure a remote source.")
 
 
 def section_1_problem() -> None:
@@ -44,12 +89,12 @@ def section_2_data_quality() -> None:
     raw_missing = None
     processed_missing = None
 
-    if DATA_RAW.exists():
-        raw_df = pd.read_csv(DATA_RAW)
+    raw_df = load_csv(DATA_RAW, DATA_BASE_URL)
+    if raw_df is not None:
         raw_rows = int(raw_df.shape[0])
         raw_missing = int(raw_df.isna().sum().sum())
-    if DATA_PROCESSED.exists():
-        processed_df = pd.read_csv(DATA_PROCESSED)
+    processed_df = load_csv(DATA_PROCESSED, DATA_BASE_URL)
+    if processed_df is not None:
         processed_rows = int(processed_df.shape[0])
         processed_missing = int(processed_df.isna().sum().sum())
 
@@ -78,11 +123,14 @@ def section_3_eda() -> None:
         st.subheader(title)
         if path.exists():
             st.image(str(path), use_container_width=True)
+        elif ARTIFACTS_BASE_URL:
+            st.image(remote_url(ARTIFACTS_BASE_URL, path.relative_to(ROOT)), use_container_width=True)
         else:
             warn_missing(path)
 
-    if DATA_PROCESSED.exists():
-        eda_df = pd.read_csv(DATA_PROCESSED, usecols=["target_readmit_30d", "time_in_hospital"])
+    eda_df = load_csv(DATA_PROCESSED, DATA_BASE_URL)
+    if eda_df is not None:
+        eda_df = eda_df[["target_readmit_30d", "time_in_hospital"]]
         summary = (
             eda_df.groupby("target_readmit_30d")["time_in_hospital"]
             .agg(
@@ -104,6 +152,8 @@ def section_3_eda() -> None:
     violin_path = FIGURES / "num_lab_procedures_by_target.png"
     if violin_path.exists():
         st.image(str(violin_path), use_container_width=True)
+    elif ARTIFACTS_BASE_URL:
+        st.image(remote_url(ARTIFACTS_BASE_URL, violin_path.relative_to(ROOT)), use_container_width=True)
     else:
         warn_missing(violin_path)
 
@@ -155,6 +205,12 @@ def section_5_monitoring() -> None:
 
     if report_path.exists():
         report = pd.read_csv(report_path)
+    elif ARTIFACTS_BASE_URL:
+        report = pd.read_csv(remote_url(ARTIFACTS_BASE_URL, report_path.relative_to(ROOT)))
+    else:
+        report = None
+
+    if report is not None:
         st.dataframe(report, use_container_width=True)
 
         if {"month", "roc_auc"}.issubset(report.columns):
