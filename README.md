@@ -39,7 +39,9 @@ streamlit run streamlit_app.py
 ```
 
 ## Cloud deployment
-If you deploy without committing generated data and artifacts, set one or both of these sources so the dashboard can load files remotely:
+If you deploy without committing generated data and artifacts, the app will now bootstrap the raw dataset from the public UCI source and run the pipeline on first launch.
+
+You can still set one or both of these sources if you want the dashboard to read from external storage instead of local files:
 - `PULSEGUARD_DATA_BASE_URL` for `data/raw/` and `data/processed/` files.
 - `PULSEGUARD_ARTIFACTS_BASE_URL` for `artifacts/` files and figures.
 

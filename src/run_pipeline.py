@@ -8,7 +8,7 @@ from src.presentation_summary import build_presentation_summary
 from src.train_model import train_and_evaluate
 
 
-if __name__ == "__main__":
+def main() -> None:
     prep = run_data_prep()
     print("Data prep complete:", prep)
 
@@ -26,3 +26,7 @@ if __name__ == "__main__":
 
     summary = build_presentation_summary()
     print("Presentation summary complete:", summary)
+
+
+if __name__ == "__main__":
+    main()

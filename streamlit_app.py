@@ -9,12 +9,14 @@ from urllib.request import urlopen
 import pandas as pd
 import streamlit as st
 
+from src.run_pipeline import main as run_pipeline_main
 
 ROOT = Path(__file__).resolve().parent
 ARTIFACTS = ROOT / "artifacts"
 FIGURES = ARTIFACTS / "figures"
 DATA_RAW = ROOT / "data" / "raw" / "diabetic_data.csv"
 DATA_PROCESSED = ROOT / "data" / "processed" / "model_input.csv"
+PIPELINE_SENTINEL = ARTIFACTS / ".pipeline_ready"
 
 
 def get_setting(secrets_key: str, env_key: str) -> str | None:
@@ -68,6 +70,33 @@ def load_csv(path: Path, base_url: str | None) -> pd.DataFrame | None:
 
 def warn_missing(path: Path) -> None:
     st.warning(f"Missing file: {path}. Run python -m src.run_pipeline first or configure a remote source.")
+
+
+def ensure_local_pipeline_outputs() -> None:
+    required_paths = [
+        DATA_RAW,
+        DATA_PROCESSED,
+        ARTIFACTS / "metrics.json",
+        ARTIFACTS / "monitoring_summary.json",
+        ARTIFACTS / "monitoring_report.csv",
+        ARTIFACTS / "eda_summary.json",
+    ]
+    if PIPELINE_SENTINEL.exists() and all(path.exists() for path in required_paths):
+        return
+
+    if all(path.exists() for path in required_paths):
+        PIPELINE_SENTINEL.parent.mkdir(parents=True, exist_ok=True)
+        PIPELINE_SENTINEL.write_text("ready", encoding="utf-8")
+        return
+
+    with st.spinner("Preparing dashboard data..."):
+        try:
+            run_pipeline_main()
+        except Exception as exc:
+            st.error(f"Unable to prepare dashboard data automatically: {exc}")
+            return
+    PIPELINE_SENTINEL.parent.mkdir(parents=True, exist_ok=True)
+    PIPELINE_SENTINEL.write_text("ready", encoding="utf-8")
 
 
 def section_1_problem() -> None:
@@ -229,6 +258,8 @@ def main() -> None:
     st.set_page_config(page_title="Healthcare Readmission Dashboard", layout="wide")
     st.title("Healthcare Readmission Analytics")
     st.caption("GDSA internship-style showcase")
+
+    ensure_local_pipeline_outputs()
 
     tab_problem, tab_quality, tab_eda, tab_models, tab_monitor = st.tabs(
         [
