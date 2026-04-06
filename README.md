@@ -1,4 +1,4 @@
-# GDSA Showcase: Healthcare Readmission Analytics
+# Healthcare Readmission Analytics
 
 This project is designed to mirror common Global Data Science & Analytics tasks in healthcare and medical-device adjacent analytics workflows.
 
