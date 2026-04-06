@@ -257,7 +257,7 @@ def section_5_monitoring() -> None:
 def main() -> None:
     st.set_page_config(page_title="Healthcare Readmission Dashboard", layout="wide")
     st.title("Healthcare Readmission Analytics")
-    st.caption("GDSA internship-style showcase")
+    st.caption("GDSA showcase")
 
     ensure_local_pipeline_outputs()
 

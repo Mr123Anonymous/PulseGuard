@@ -1,4 +1,4 @@
-# GDSA Internship Showcase: Healthcare Readmission Analytics
+# GDSA Showcase: Healthcare Readmission Analytics
 
 This project is designed to mirror common Global Data Science & Analytics tasks in healthcare and medical-device adjacent analytics workflows.
 
